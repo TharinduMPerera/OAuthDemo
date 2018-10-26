@@ -4,15 +4,27 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.app.tharindu.oauthdemo.R;
 import com.app.tharindu.oauthdemo.helper.Consts;
+import com.app.tharindu.oauthdemo.models.AccessToken;
+import com.app.tharindu.oauthdemo.services.sync.UserSync;
+import com.wang.avi.AVLoadingIndicatorView;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements UserSync.UserSyncCallback {
+
+    @BindView(R.id.loadingAnimation)
+    AVLoadingIndicatorView loadingAnimation;
+
+    @BindView(R.id.githubLoginBtn)
+    Button githubLoginBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +40,17 @@ public class MainActivity extends AppCompatActivity {
         startActivity(githubLogin);
     }
 
+    private void setLoginBtnEnabled(boolean status) {
+        githubLoginBtn.setEnabled(status);
+        if (status) {
+            loadingAnimation.setVisibility(View.GONE);
+            githubLoginBtn.setVisibility(View.VISIBLE);
+        } else {
+            githubLoginBtn.setVisibility(View.GONE);
+            loadingAnimation.setVisibility(View.VISIBLE);
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -37,10 +60,22 @@ public class MainActivity extends AppCompatActivity {
             String code = uri.getQueryParameter("code");
             String error;
             if (code != null) {
-
+                setLoginBtnEnabled(false);
+                new UserSync(this).getAccessToken(code);
             } else if ((error = uri.getQueryParameter("error")) != null) {
-                Toast.makeText(this, "Something went wrong! Error: " + error, Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Something went wrong!\nError: " + error, Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+    @Override
+    public void onAccessTokenGranted(AccessToken accessToken) {
+
+    }
+
+    @Override
+    public void onUserSyncError(String error) {
+        Toast.makeText(this, "Something went wrong!\nError: " + error, Toast.LENGTH_LONG).show();
+        setLoginBtnEnabled(true);
     }
 }
