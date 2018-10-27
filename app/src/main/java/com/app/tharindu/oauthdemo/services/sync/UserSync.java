@@ -26,7 +26,8 @@ public class UserSync {
                 if (response.isSuccessful() && response.body() != null) {
                     userSyncCallback.onAccessTokenGranted(response.body());
                 } else {
-                    userSyncCallback.onUserSyncError("Something went wrong!");
+                    userSyncCallback.onUserSyncError(response.errorBody() != null ?
+                            response.errorBody().toString() : "Something went wrong!");
                 }
             }
 
