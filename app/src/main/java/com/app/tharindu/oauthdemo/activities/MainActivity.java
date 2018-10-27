@@ -11,14 +11,19 @@ import android.widget.Toast;
 import com.app.tharindu.oauthdemo.R;
 import com.app.tharindu.oauthdemo.helper.Consts;
 import com.app.tharindu.oauthdemo.models.AccessToken;
+import com.app.tharindu.oauthdemo.models.Repository;
+import com.app.tharindu.oauthdemo.services.sync.RepoSync;
 import com.app.tharindu.oauthdemo.services.sync.UserSync;
 import com.wang.avi.AVLoadingIndicatorView;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity implements UserSync.UserSyncCallback {
+public class MainActivity extends AppCompatActivity implements UserSync.UserSyncCallback,
+        RepoSync.RepoSyncCallback {
 
     @BindView(R.id.loadingAnimation)
     AVLoadingIndicatorView loadingAnimation;
@@ -70,12 +75,28 @@ public class MainActivity extends AppCompatActivity implements UserSync.UserSync
 
     @Override
     public void onAccessTokenGranted(AccessToken accessToken) {
+        // once the access token is granted, it should be encrypted and saved
+        // for the demonstration, that part is not implemented
+        Toast.makeText(this, "Access token is granted Successfully!", Toast.LENGTH_LONG).show();
+        System.out.println("Access Token: " + accessToken.getAccessToken());
+
+        new RepoSync(this).getRepos(accessToken);
 
     }
 
     @Override
     public void onUserSyncError(String error) {
-        Toast.makeText(this, "Something went wrong!\nError: " + error, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Access Token Granting Error:\n" + error, Toast.LENGTH_LONG).show();
         setLoginBtnEnabled(true);
+    }
+
+    @Override
+    public void onReposFound(List<Repository> repos) {
+        System.out.println("Repos are found");
+    }
+
+    @Override
+    public void onRepoSyncError(String error) {
+        System.out.println("Repo Fetching Error:\n" + error);
     }
 }
