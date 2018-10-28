@@ -3,4 +3,6 @@
     <color name="colorPrimary">#7f7f7f</color>
     <color name="colorPrimaryDark">#323232</color>
     <color name="colorAccent">#000000</color>
+
+    <color name="colorWidgetBackground">#E9E9E7</color>
 </resources>

@@ -22,8 +22,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity implements UserSync.UserSyncCallback,
-        RepoSync.RepoSyncCallback {
+public class MainActivity extends AppCompatActivity implements UserSync.UserSyncCallback {
 
     @BindView(R.id.loadingAnimation)
     AVLoadingIndicatorView loadingAnimation;
@@ -36,6 +35,13 @@ public class MainActivity extends AppCompatActivity implements UserSync.UserSync
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+    }
+
+    private void showReposActivity(AccessToken accessToken) {
+        Intent reposActivityIntent = new Intent(this, ReposActivity.class);
+        reposActivityIntent.putExtra(Consts.EXTRA_ACCESSTOKEN, accessToken);
+        startActivity(reposActivityIntent);
+        finish();
     }
 
     @OnClick(R.id.githubLoginBtn)
@@ -80,23 +86,12 @@ public class MainActivity extends AppCompatActivity implements UserSync.UserSync
         Toast.makeText(this, "Access token is granted Successfully!", Toast.LENGTH_LONG).show();
         System.out.println("Access Token: " + accessToken.getAccessToken());
 
-        new RepoSync(this).getRepos(accessToken);
-
+        showReposActivity(accessToken);
     }
 
     @Override
     public void onUserSyncError(String error) {
         Toast.makeText(this, "Access Token Granting Error:\n" + error, Toast.LENGTH_LONG).show();
         setLoginBtnEnabled(true);
-    }
-
-    @Override
-    public void onReposFound(List<Repository> repos) {
-        System.out.println("Repos are found");
-    }
-
-    @Override
-    public void onRepoSyncError(String error) {
-        System.out.println("Repo Fetching Error:\n" + error);
     }
 }
